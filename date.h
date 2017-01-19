@@ -4,88 +4,105 @@
 #include <ctime>
 
 
-typedef unsigned int ui;
 
 class Date
 {
 private:
-    ui day_;
-    ui month_;
-    ui year_;
-    ui day_max_;
-    const ui month_max_ = 12;
+    unsigned short day_;
+    unsigned short month_;
+    unsigned int year_;
+    unsigned short day_max_;
+    const unsigned short month_max_ = 12;
     void DayMaxSet()
     {
-        switch (month_)
+        day_max_ = MaxDay(month_, year_);
+    }
+    unsigned short MaxDay(unsigned short month, unsigned int year)
+    {
+        switch (month)
         {
-            case 4  : day_max_ = 30; break;
-            case 6  : day_max_ = 30; break;
-            case 9  : day_max_ = 30; break;
-            case 11 : day_max_ = 30; break;
+            case 4  : return 30;
+            case 6  : return 30;
+            case 9  : return 30;
+            case 11 : return 30;
             case 2  :
             {
-                if(isYearLeap(year_))
-                    day_max_ = 28;
+                if(isYearLeap(year))
+                    return 28;
                 else
-                    day_max_ = 29;
+                    return 29;
             }
-            default: day_max_ = 31;
+            default: return 31;
         }
-
     }
-    bool isYearLeap(ui year)
+
+    bool isYearLeap(unsigned int year)
     {
-         if(year_%4 || (year_%100 == 0 && year_ % 400))
+         if(year%4 || (year%100 == 0 && year % 400))
              return false;
          else
              return true;
     }
-    bool isDateCorrect()
+    bool isDateCorrect(unsigned short day, unsigned short month, unsigned int year)
     {
-        if((month_ > 0) && (month_ < month_max_))
+        if((month > 0) && (month <= month_max_))
         {
-            if((day_ > 0) && (day_ < day_max_))
-                return 1;
+            if((day > 0) && (day <= MaxDay(month, year)))
+            {
+                if(year > 0)
+
+                return true;
+            }
         }
-        return 0;
+
+        return false;
     }
+
+
 
 public:
     Date() : day_(1), month_(1), year_(1), day_max_(31){}
     Date(const Date& d);
-    Date(ui day,ui month, ui year) : day_(day), month_(month), year_(year)
+    Date(unsigned short day,unsigned short month, unsigned int year) :
+        day_(day), month_(month), year_(year)
     {
        DayMaxSet();
     }
+
+
+    void SetDate(unsigned short day = 1, unsigned short month = 1, unsigned int year = 1);
+
     void SetCurrentDate();
-    Date Add(ui days = 0, ui months = 0, ui years = 0);
+    Date Add(unsigned short days = 0, unsigned short months = 0, unsigned int years = 0);
+    Date& operator =(const Date& op2);
+
     Date& operator ++(int);
     Date& operator --(int);
-    Date  operator -(ui days);
-    Date  operator +(ui days);
+    Date  operator -(unsigned int days)const;
+    Date  operator +(unsigned int days)const;
+    unsigned int operator -(const Date& op2)const;
 
-    Date& operator =(const Date& op2);
-    Date  operator -(const Date& op2);//Repair
-    Date  operator +(const Date& op2);//Implement
-    //TODO: implement relational operators
-    bool operator<(const Date& op2);
-    bool operator>(const Date& op2);
-    bool operator==(const Date& op2);
-    bool operator<=(const Date& op2);
-    bool operator>=(const Date& op2);
-    //
+    //Relative opertorn
+    bool operator < (const Date& op2)const;
+    bool operator > (const Date& op2)const;
+    bool operator ==(const Date& op2)const;
+    bool operator !=(const Date& date)const;
+    bool operator <=(const Date& op2)const;
+    bool operator >=(const Date& op2)const;
+
+    //I/O Operators
     friend std::ostream& operator <<(std::ostream &os, const Date& date);
     friend std::istream& operator >>(std::istream &is, Date& date);
 
-    ui GetYear()
+    unsigned int GetYear()
     {
         return year_;
     }
-    ui GetMonth()
+    unsigned short GetMonth()
     {
         return month_;
     }
-    ui GetDay()
+    unsigned short GetDay()
     {
         return day_;
     }

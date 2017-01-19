@@ -24,7 +24,7 @@ void Date::SetCurrentDate()
 
 
 }
-Date Date::Add(ui days, ui months, ui years)
+Date Date::Add(unsigned short days, unsigned short months, unsigned int years)
 {
     year_ += years;
     month_ += months;
@@ -46,8 +46,7 @@ Date Date::Add(ui days, ui months, ui years)
         }
         DayMaxSet();
     }
-
-
+    return *this;
 }
 
 Date& Date::operator ++(int)
@@ -71,6 +70,21 @@ Date& Date::operator ++(int)
         year_++;
         DayMaxSet();
         return *this;
+    }
+}
+
+void Date::SetDate(unsigned short day, unsigned short month, unsigned int year)
+{
+    if(isDateCorrect(day, month, year))
+    {
+        day_ = day;
+        month_ = month;
+        year_ = year;
+        DayMaxSet();
+    }
+    else
+    {
+        SetDate();
     }
 }
 
@@ -108,44 +122,10 @@ Date& Date::operator =(const Date& date)
     return *this;
 }
 
-Date Date::operator+(unsigned days)
+
+
+unsigned int Date::operator -(const Date& op2)const
 {
-    Date temp(*this);
-    for(int i = 0; i < days; i++)
-        temp++;
-    return temp;
-}
-//18.01.2017 - 29.01.1996
-Date Date::operator -(const Date& op2)
-{
-    Date temp;
-    temp.year_ = year_ - op2.year_;
-    if(month_ >= op2.month_)
-        temp.month_ = month_ - op2.month_;
-    else
-    {
-        temp.month_ = 12 - op2.month_ + month_;
-        temp.year_--;
-    }
-    temp.DayMaxSet();
-    if(day_ >= op2.day_)
-        temp.day_ = day_ - op2.day_;
-    else
-    {
-        if(temp.month_ > 1)
-        {
-            temp.month_--;
-            temp.DayMaxSet();
-        }
-        else
-        {
-            temp.year_--;
-            temp.month_ = 12;
-            DayMaxSet();
-        }
-        temp.day_ = day_max_ - op2.day_ + day_;
-    }
-    return temp;
 
 }
 
@@ -170,82 +150,65 @@ std::ostream& operator <<(std::ostream &os, const Date& date)
 std::istream& operator >>(std::istream &is, Date& date)
 {
     char c;
-    is >> date.day_ >> c >> date.month_ >> c >> date.year_;
-    date.DayMaxSet();
-    //if(date.isDateCorrect())
-    //    return is;
-    //else
-
+    unsigned int day, month, year;
+    is >> day >> c >> month >> c >> year;
+    date.SetDate(day, month, year);
     return is;
 }
 
 
-bool Date::operator <(const Date& date)
+bool Date::operator <(const Date& date)const
+{
+    if(year_ < date.year_)
+        return 1;
+    else if(year_ == date.year_)
+    {
+        if(month_ < date.month_)
+            return 1;
+        else if(month_ == date.month_)
+        {
+            if(day_ < date.day_)
+                return 1;
+        }
+    }
+    return 0;
+
+}
+
+
+bool Date::operator >(const Date& date)const
 {
     if(year_ > date.year_)
-        return 0;
-    else if(month_ > date.month_)
-        return 0;
-    else if(day_ > date.day_)
-        return 0;
-    else if(*this != date)
         return 1;
-    else
-        return 0;
+    else if(year_ == date.year_)
+    {
+        if(month_ > date.month_)
+            return 1;
+        else if(month_ == date.month_)
+        {
+            if(day_ > date.day_)
+                return 1;
+        }
+    }
+    return 0;
 }
 
-
-bool Date::operator >(const Date& date)
+bool Date::operator ==(const Date& date)const
 {
-    if(year_ > date.year_)
-        return 1;
-    else if(month_ > date.month_)
-        return 1;
-    else if(day_ > date.day_)
-        return 1;
-    else
-        return 0;
+    return ((year_ == date.year_) && (month_ == date.month_) && (year_ == date.year_));
 }
 
-
-bool Date::operator ==(const Date& date)
+bool Date::operator !=(const Date& date)const
 {
-    if(year_ != date.year_)
-        return 1;
-    else if(month_ != date.month_)
-        return 1;
-    else if(day_ != date.day_)
-        return 1;
-    else
-        return 0;
+    return (!(*this == date));
 }
 
-bool Date::operator ==(const Date& date)
+bool Date::operator <=(const Date& date)const
 {
-    if(year_ == date.year_)
-        return 1;
-    else if(month_ != date.month_)
-        return 1;
-    else if(day_ != date.day_)
-        return 1;
-    else
-        return 0;
+    return ((*this < date) || (*this == date));
 }
 
-bool Date::operator <=(const Date& date)
+bool Date::operator >=(const Date& date)const
 {
-    if((*this < date) || (*this == date))
-        return 1;
-    else
-        return 0;
-}
-
-
-
-bool Date::operator >=(const Date& date)
-{
-    if((*this > date) || (*this == date))
-        return 1;
-    else
-        return 0;
+    return ((*this < date) || (*this == date));
 }
